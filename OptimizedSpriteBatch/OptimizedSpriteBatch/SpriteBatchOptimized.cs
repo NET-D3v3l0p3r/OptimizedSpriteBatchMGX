@@ -43,6 +43,10 @@ namespace OptimizedSpriteBatch
         private BasicEffect _effect;
 
         private int _toDraw;
+
+        private Matrix _globalMatrix;
+
+        private bool _beginCalled;
         private bool _needsFlush;
 
         public SpriteBatchOptimized(GraphicsDevice _device, int _textureWidth, int _textureHeight)
@@ -118,34 +122,48 @@ namespace OptimizedSpriteBatch
             _vectorBuffer.Add(_name, _spriteBuffer.Count * 4);
             _spriteBuffer.Add(new Sprite(this, -1 * (_initialPosition / new  Vector2(AbsoluteTextureSizeWidth, AbsoluteTextureSizeHeight)), _origin, _rotation, _textureAtlas[_texture]));
             _needsFlush = true;
-        } 
+        }
 
-        private void InternalUpdate(string _name, Vector2 _newPosition, Vector2 _origin, float _rotation, Texture2D _texture)
+        public void Draw(Texture2D _texture, string _name, Vector2 _position, Vector2 _origin, float _rotation)
+        {
+            __internalUpdate(_name, _position, _origin, _rotation, _texture);
+
+        }
+
+        private void __internalUpdate(string _name, Vector2 _newPosition, Vector2 _origin, float _rotation, Texture2D _texture)
         {
             int __index = _vectorBuffer[_name];
             Sprite __sprite = new Sprite(this, -1 * (_newPosition / new Vector2(AbsoluteTextureSizeWidth, AbsoluteTextureSizeHeight)), _origin, _rotation, _textureAtlas[_texture]);
             _vertexBuffer.SetData<VertexPositionTexture>(VertexPositionTexture.VertexDeclaration.VertexStride * __index, __sprite.Vertices, 0, 4, VertexPositionTexture.VertexDeclaration.VertexStride);
         }
-        public void Draw(Texture2D _texture, string _name, Vector2 _position, Vector2 _origin, float _rotation)
+     
+        public void Begin(Matrix _manipulation)
         {
-            InternalUpdate(_name, _position,  _origin, _rotation, _texture);
 
-        }
-        public void ApplyToBackBuffer(Matrix _manipulation)
-        {
+            if (!_beginCalled)
+                _beginCalled = true;
+            else throw new Exception("Call end()!");
             if (_needsFlush)
             {
                 _needsFlush = false;
-                InternalAllocateBuffers();
+                __internalAllocateBuffers();
             }
-            InternalDraw(_manipulation);
+            _globalMatrix = _manipulation;
         }
 
+        public void End()
+        {
+            if (_beginCalled)
+                _beginCalled = false;
+            else throw new Exception("Call begin()!");
+
+            __internalDraw(_globalMatrix);
+        }
 
         /// <summary>
         /// CALL THIS IN LOAD METHOD
         /// </summary>
-        private void InternalAllocateBuffers()
+        private void __internalAllocateBuffers()
         {
             int __offset = 0;
             int __vertexOffset = 0;
@@ -196,7 +214,7 @@ namespace OptimizedSpriteBatch
 
             GC.Collect();
         }
-        private void InternalDraw(Matrix _manipulation)
+        private void __internalDraw(Matrix _manipulation)
         {
 
             GraphicsDevice.SetVertexBuffer(_vertexBuffer);
