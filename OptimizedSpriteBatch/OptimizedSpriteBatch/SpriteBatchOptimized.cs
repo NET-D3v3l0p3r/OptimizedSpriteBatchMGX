@@ -124,7 +124,7 @@ namespace OptimizedSpriteBatch
             _needsFlush = true;
         }
 
-        public void Draw(Texture2D _texture, string _name, Vector2 _position, Vector2 _origin, float _rotation)
+        public void Edit(Texture2D _texture, string _name, Vector2 _position, Vector2 _origin, float _rotation)
         {
             __internalUpdate(_name, _position, _origin, _rotation, _texture);
 
@@ -136,7 +136,7 @@ namespace OptimizedSpriteBatch
             Sprite __sprite = new Sprite(this, -1 * (_newPosition / new Vector2(AbsoluteTextureSizeWidth, AbsoluteTextureSizeHeight)), _origin, _rotation, _textureAtlas[_texture]);
             _vertexBuffer.SetData<VertexPositionTexture>(VertexPositionTexture.VertexDeclaration.VertexStride * __index, __sprite.Vertices, 0, 4, VertexPositionTexture.VertexDeclaration.VertexStride);
         }
-     
+      
         public void Begin(Matrix _manipulation)
         {
 
