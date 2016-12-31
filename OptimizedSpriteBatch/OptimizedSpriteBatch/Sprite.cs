@@ -18,6 +18,14 @@ namespace OptimizedSpriteBatch
         {
             texCoord = new Vector2(texCoord.X * batch.RatioX, texCoord.Y * batch.RatioY);
 
+            /*
+             * 
+             * p'x = cos(theta) * (px-ox) - sin(theta) * (py-oy) + ox
+
+               p'y = sin(theta) * (px-ox) + cos(theta) * (py-oy) + oy
+             * 
+             */
+
             Vector3 __right = new Vector3(1, 0, 0);
             Vector3 __top = new Vector3(0, 1, 0);
             Vector3 __topRight = new Vector3(1, 1, 0);

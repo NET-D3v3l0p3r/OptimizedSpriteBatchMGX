@@ -31,12 +31,9 @@ namespace OptimizedSpriteBatch
 
         private Dictionary<Texture2D, Vector2> _textureAtlas = new Dictionary<Texture2D, Vector2>();
         private List<Sprite> _spriteBuffer = new List<Sprite>();
-
-
         private Dictionary<string, int> _vectorBuffer = new Dictionary<string, int>();
 
-        
-
+       
         private VertexBuffer _vertexBuffer;
         private IndexBuffer _indexBuffer;
 
@@ -48,8 +45,9 @@ namespace OptimizedSpriteBatch
 
         private bool _beginCalled;
         private bool _needsFlush;
+        private bool _clearCache;
 
-        public SpriteBatchOptimized(GraphicsDevice _device, int _textureWidth, int _textureHeight)
+        public SpriteBatchOptimized(GraphicsDevice _device, int _textureWidth, int _textureHeight, bool _clear = true)
         {
             GraphicsDevice = _device;
 
@@ -57,6 +55,7 @@ namespace OptimizedSpriteBatch
             AbsoluteTextureSizeHeight = _textureHeight;
 
             _effect = new BasicEffect(GraphicsDevice);
+            this._clearCache = _clear;
         }
 
         /// <summary>
@@ -208,7 +207,9 @@ namespace OptimizedSpriteBatch
 
             _internalTextureAtlas2D = GetTextureAtlas();
 
-            _spriteBuffer.Clear();
+            if (_clearCache)
+                _spriteBuffer.Clear();
+
             __vertices = new VertexPositionTexture[0];
             __indices = new int[0];
 
@@ -216,6 +217,9 @@ namespace OptimizedSpriteBatch
         }
         private void __internalDraw(Matrix _manipulation)
         {
+
+            if (_vertexBuffer == null)
+                return;
 
             GraphicsDevice.SetVertexBuffer(_vertexBuffer);
             GraphicsDevice.Indices = _indexBuffer;
@@ -235,6 +239,17 @@ namespace OptimizedSpriteBatch
             _effect.CurrentTechnique.Passes[0].Apply();
 
             GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, _toDraw * 2);
+        }
+
+        public void ClearCache()
+        {
+            _spriteBuffer.Clear();
+            _vectorBuffer.Clear();
+
+            _vertexBuffer.Dispose();
+            _indexBuffer.Dispose();
+
+            GC.Collect();
         }
 
 
